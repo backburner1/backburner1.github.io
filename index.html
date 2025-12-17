@@ -2,264 +2,940 @@
 <html lang="id">
 <head>
 <meta charset="UTF-8">
-<title>Nicolas Server</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Welcome to Nicolas Server</title>
 
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
-*{box-sizing:border-box;font-family:'Inter',sans-serif}
-body{
-margin:0;height:100vh;
-background:linear-gradient(135deg,#6366f1,#8b5cf6);
-overflow:hidden;
-}
-.hidden{display:none}
-
-/* WELCOME */
-#welcome{
-position:fixed;inset:0;
-display:flex;align-items:center;justify-content:center;
-background:radial-gradient(circle at top,#6366f1,#312e81);
-color:#fff;z-index:999;
-animation:fadeOut 1s ease forwards;
-animation-delay:2.5s;
-}
-#welcome h1{font-size:34px;letter-spacing:3px}
-
-/* LOGIN */
-#login{
-position:fixed;inset:0;
-display:flex;align-items:center;justify-content:center;
-backdrop-filter:blur(18px);
-background:rgba(15,23,42,.45);
-z-index:500;
-}
-.login-box{
-width:320px;padding:30px;
-border-radius:26px;
-background:rgba(255,255,255,.15);
-box-shadow:0 30px 80px rgba(0,0,0,.4);
-color:#fff;
-animation:pop .5s ease;
-}
-.login-box h2{text-align:center}
-.login-box select,.login-box input,.login-box button{
-width:100%;padding:12px;margin:10px 0;
-border:none;border-radius:14px;
-}
-.login-box button{
-background:#fff;color:#4f46e5;font-weight:600;cursor:pointer;
+/* =================================================== */
+/*                     GLOBAL STYLES                  */
+/* =================================================== */
+:root {
+  --primary-color: #6366f1;
+  --primary-dark: #4f46e5;
+  --secondary-color: #8b5cf6;
+  --background-color: #f8fafc;
+  --surface-color: #ffffff;
+  --text-primary: #1e293b;
+  --text-secondary: #64748b;
+  --text-on-primary: #ffffff;
+  --border-color: #e2e8f0;
+  --error-color: #ef4444;
+  --success-color: #10b981;
+  --sidebar-bg: rgba(15, 23, 42, 0.9);
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  --radius: 12px;
 }
 
-/* APP */
-#app{display:flex;height:100%}
-.sidebar{
-width:260px;padding:20px;
-background:rgba(255,255,255,.12);
-backdrop-filter:blur(16px);
-color:#fff;
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
 }
-.avatar{
-width:64px;height:64px;border-radius:50%;
-background:#fff;color:#4f46e5;
-display:flex;align-items:center;justify-content:center;
-font-size:26px;font-weight:700;margin:auto;
-}
-.username{text-align:center;margin:12px 0}
-.menu button{
-width:100%;padding:14px;margin:8px 0;
-border:none;border-radius:16px;
-background:rgba(255,255,255,.18);
-color:#fff;cursor:pointer;
-transition:.3s;
-}
-.menu button:hover{background:rgba(255,255,255,.3);transform:translateX(6px)}
 
-.main{
-flex:1;padding:30px;
-background:#f8fafc;
-overflow:auto;
-border-top-left-radius:40px;
+body {
+  font-family: 'Inter', sans-serif;
+  background-color: var(--background-color);
+  color: var(--text-primary);
+  height: 100vh;
+  overflow: hidden;
 }
-.card{
-background:#fff;padding:20px;
-border-radius:24px;
-box-shadow:0 15px 40px rgba(0,0,0,.12);
-margin-bottom:20px;
-animation:pop .4s ease;
-}
-textarea,input{width:100%;padding:12px;border-radius:14px;margin:8px 0}
-pre{background:#020617;color:#fff;padding:14px;border-radius:14px;overflow:auto}
 
-@keyframes pop{from{opacity:0;transform:scale(.9)}to{opacity:1}}
-@keyframes fadeOut{to{opacity:0;visibility:hidden}}
+/* =================================================== */
+/*                     WELCOME SCREEN                  */
+/* =================================================== */
+#welcome {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+  color: var(--text-on-primary);
+  z-index: 1000;
+  animation: welcomeOut 1s ease forwards;
+  animation-delay: 3s;
+}
+
+.welcome-box {
+  text-align: center;
+}
+
+.welcome-line {
+  font-size: 2.5rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  opacity: 0;
+  filter: blur(12px);
+  animation: reveal 0.8s ease forwards;
+}
+
+.welcome-line:nth-child(1) { animation-delay: 0.4s; }
+.welcome-line:nth-child(2) { animation-delay: 1.4s; }
+
+@keyframes reveal {
+  to { opacity: 1; transform: translateY(0); filter: blur(0); }
+  from { opacity: 0; transform: translateY(40px); filter: blur(12px); }
+}
+
+@keyframes welcomeOut {
+  to { opacity: 0; visibility: hidden; }
+}
+
+/* =================================================== */
+/*                      LOGIN SCREEN                   */
+/* =================================================== */
+#loginScreen {
+  position: fixed;
+  inset: 0;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  background: rgba(15, 23, 42, 0.7);
+  backdrop-filter: blur(12px);
+  z-index: 999;
+  animation: fadeIn 0.5s ease forwards;
+}
+
+.login-box {
+  background: var(--surface-color);
+  padding: 2.5rem;
+  width: 420px;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-lg);
+  text-align: center;
+}
+
+.login-header h2 {
+  font-size: 1.875rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 0.5rem;
+}
+
+.login-header p {
+  color: var(--text-secondary);
+  margin-bottom: 2rem;
+}
+
+.form-group {
+  margin-bottom: 1.5rem;
+  text-align: left;
+}
+
+.form-group label {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--text-primary);
+  margin-bottom: 0.5rem;
+}
+
+.form-group input {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius);
+  font-size: 1rem;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.form-group input:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+}
+
+.btn {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: none;
+  border-radius: var(--radius);
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s, transform 0.1s, box-shadow 0.2s;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+  color: var(--text-on-primary);
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.btn-primary:active {
+  transform: translateY(0);
+}
+
+.btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
+#loginError {
+  display: none; /* Hidden by default */
+  margin-top: 1rem;
+  padding: 0.75rem;
+  background-color: #fee2e2;
+  border: 1px solid #fecaca;
+  color: var(--error-color);
+  border-radius: var(--radius);
+  font-size: 0.875rem;
+  text-align: left;
+}
+
+/* =================================================== */
+/*                       MAIN APP                      */
+/* =================================================== */
+#app {
+  display: none;
+  width: 100%;
+  height: 100vh;
+  animation: fadeIn 0.8s ease forwards;
+}
+
+.app-container {
+  display: flex;
+  height: 100%;
+}
+
+/* =================================================== */
+/*                        SIDEBAR                      */
+/* =================================================== */
+.sidebar {
+  width: 280px;
+  background: var(--sidebar-bg);
+  backdrop-filter: blur(16px);
+  padding: 2rem 1.5rem;
+  color: var(--text-on-primary);
+  display: flex;
+  flex-direction: column;
+  transition: width 0.3s ease;
+}
+
+.sidebar.collapsed {
+  width: 80px;
+}
+
+.sidebar-header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.avatar {
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  background: var(--surface-color);
+  color: var(--primary-color);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.75rem;
+  font-weight: 700;
+  margin: 0 auto;
+  box-shadow: var(--shadow-md);
+}
+
+.username {
+  margin-top: 1rem;
+  font-weight: 600;
+  font-size: 1rem;
+  opacity: 0.8;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sidebar.collapsed .username {
+  display: none;
+}
+
+.nav-menu {
+  list-style: none;
+  flex-grow: 1;
+}
+
+.nav-menu li {
+  margin-bottom: 0.5rem;
+}
+
+.nav-menu button {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--text-on-primary);
+  border: none;
+  border-radius: var(--radius);
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+  text-align: left;
+  transition: background-color 0.2s, transform 0.2s;
+  display: flex;
+  align-items: center;
+}
+
+.nav-menu button:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: translateX(5px);
+}
+
+.sidebar.collapsed .nav-menu button {
+  justify-content: center;
+}
+
+.sidebar.collapsed .nav-menu button span {
+  display: none;
+}
+
+/* =================================================== */
+/*                          MAIN                       */
+/* =================================================== */
+.main {
+  flex-grow: 1;
+  padding: 2rem;
+  background-color: var(--background-color);
+  overflow-y: auto;
+}
+
+.page-header {
+  margin-bottom: 2rem;
+}
+
+.page-header h1 {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+/* =================================================== */
+/*                           CARDS                      */
+/* =================================================== */
+.card {
+  background: var(--surface-color);
+  padding: 1.5rem;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+  margin-bottom: 1.5rem;
+  border: 1px solid var(--border-color);
+  animation: cardIn 0.5s ease-out;
+}
+
+.card h3 {
+  margin-bottom: 0.5rem;
+  color: var(--text-primary);
+}
+
+.card-meta {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  margin-bottom: 1rem;
+}
+
+.card pre {
+  background-color: #f1f5f9;
+  padding: 1rem;
+  border-radius: 8px;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.card-actions {
+  margin-top: 1.5rem;
+  display: flex;
+  gap: 1rem;
+}
+
+.btn-secondary {
+  background-color: var(--primary-dark);
+  color: var(--text-on-primary);
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+  flex-grow: 1;
+}
+
+.btn-danger {
+  background-color: var(--error-color);
+  color: var(--text-on-primary);
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+  flex-grow: 1;
+}
+
+/* =================================================== */
+/*                           FORMS                      */
+/* =================================================== */
+.form-container {
+  background: var(--surface-color);
+  padding: 2rem;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--border-color);
+  margin-bottom: 2rem;
+}
+
+.form-container .form-group {
+  margin-bottom: 1.5rem;
+}
+
+.form-container textarea {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius);
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+  font-size: 0.9rem;
+  resize: vertical;
+  min-height: 200px;
+}
+
+.form-container textarea:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+}
+
+.form-actions {
+  display: flex;
+  gap: 1rem;
+}
+
+.error-message {
+  color: var(--error-color);
+  font-size: 0.875rem;
+  margin-top: 0.5rem;
+  display: block;
+}
+
+/* =================================================== */
+/*                      UTILITIES                       */
+/* =================================================== */
+.hidden {
+  display: none;
+}
+
+.text-center {
+  text-align: center;
+}
+
+.loading {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  border: 3px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  border-top-color: #fff;
+  animation: spin 1s ease-in-out infinite;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes cardIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
 </style>
 </head>
 
 <body>
 
-<!-- WELCOME -->
-<div id="welcome"><h1>Welcome to Nicolas Server</h1></div>
-
-<!-- LOGIN -->
-<div id="login">
-  <div class="login-box">
-    <h2>Backburner Login</h2>
-    <select id="userInput">
-      <option>Nicolas Tok</option>
-      <option>clairine</option>
-      <option>wixander</option>
-      <option>angel</option>
-    </select>
-    <input id="passInput" type="password" placeholder="Password">
-    <button onclick="login()">Masuk</button>
+<!-- WELCOME SCREEN -->
+<div id="welcome">
+  <div class="welcome-box">
+    <div class="welcome-line">WELCOME TO</div>
+    <div class="welcome-line">NICOLAS SERVER</div>
   </div>
 </div>
 
-<!-- APP -->
-<div id="app" class="hidden">
-  <div class="sidebar">
-    <div class="avatar" id="ava"></div>
-    <div class="username" id="uname"></div>
-    <div class="menu" id="menu"></div>
+<!-- LOGIN SCREEN -->
+<div id="loginScreen">
+  <div class="login-box">
+    <div class="login-header">
+      <h2>Selamat Datang</h2>
+      <p>Masuk untuk melanjutkan</p>
+    </div>
+    <form id="loginForm" onsubmit="return false;">
+      <div class="form-group">
+        <label for="email">Email</label>
+        <input type="email" id="email" placeholder="nama@example.com" required>
+      </div>
+      <div class="form-group">
+        <label for="password">Kata Sandi</label>
+        <input type="password" id="password" placeholder="••••••••" required>
+      </div>
+      <button type="submit" class="btn btn-primary" onclick="handleLogin()" id="loginBtn">Masuk</button>
+      <div id="loginError"></div>
+    </form>
   </div>
+</div>
 
-  <div class="main">
-    <div id="home"></div>
-
-    <div id="editor" class="hidden">
-      <h2>Upload Materi (Admin)</h2>
-      <input id="fileName" placeholder="Nama File">
-      <textarea id="codeArea"></textarea>
-      <button onclick="uploadMateri()">Upload ke Beranda</button>
+<!-- MAIN APPLICATION -->
+<div id="app">
+  <div class="app-container">
+    <!-- SIDEBAR -->
+    <div class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <div class="avatar" id="ava">N</div>
+        <div class="username" id="uname">User Name</div>
+      </div>
+      <ul class="nav-menu">
+        <li><button onclick="show('dash')"><span>Dashboard</span></button></li>
+        <li><button onclick="show('editor')"><span>Code Editor</span></button></li>
+        <li><button onclick="show('task')"><span>Kumpul Tugas</span></button></li>
+        <li><button onclick="show('review')" id="reviewBtn"><span>Review</span></button></li>
+        <li><button onclick="toggle()"><span>Kecilkan</span></button></li>
+        <li><button onclick="logout()"><span>Keluar</span></button></li>
+      </ul>
     </div>
 
-    <div id="submit" class="hidden">
-      <h2>Kumpul Tugas</h2>
-      <input id="taskTitle" placeholder="Judul Tugas">
-      <textarea id="taskCode"></textarea>
-      <button onclick="submitTask()">Kirim</button>
-    </div>
+    <!-- MAIN CONTENT AREA -->
+    <div class="main">
+      <div id="dash" class="page-content">
+        <div class="page-header"><h1>Dashboard</h1></div>
+        <div id="dashContent"></div>
+      </div>
 
-    <div id="tasks" class="hidden">
-      <h2>Tugas Masuk</h2>
-      <div id="taskList"></div>
+      <div id="editor" class="page-content hidden">
+        <div class="page-header"><h1>Code Editor</h1></div>
+        <div class="form-container">
+          <div class="form-group">
+            <label for="materiTitle">Judul Materi</label>
+            <input type="text" id="materiTitle" placeholder="Masukkan judul materi">
+          </div>
+          <div class="form-group">
+            <label for="materiContent">Konten</label>
+            <textarea id="materiContent" placeholder="Tulis kode atau konten di sini..."></textarea>
+          </div>
+          <div class="form-actions">
+            <button id="saveMateriBtn" class="btn btn-primary" onclick="saveMateri()">Simpan Materi Baru</button>
+            <button class="btn btn-secondary" onclick="newFile()">Buat File Baru</button>
+          </div>
+          <div id="uploadError" class="error-message"></div>
+        </div>
+      </div>
+
+      <div id="task" class="page-content hidden">
+        <div class="page-header"><h1>Kumpul Tugas</h1></div>
+        <div class="form-container">
+          <div class="form-group">
+            <label for="taskTitle">Judul Tugas</label>
+            <input type="text" id="taskTitle" placeholder="Masukkan judul tugas">
+          </div>
+          <div class="form-group">
+            <label for="taskDeadline">Deadline</label>
+            <input type="datetime-local" id="taskDeadline">
+          </div>
+          <div class="form-group">
+            <label for="taskCode">Kode / Jawaban</label>
+            <textarea id="taskCode" placeholder="Tulis kode atau jawaban Anda di sini..."></textarea>
+          </div>
+          <div class="form-actions">
+            <button id="submitTaskBtn" class="btn btn-primary" onclick="submitTask()">Kirim Tugas</button>
+            <button class="btn btn-secondary" onclick="resetTaskForm()">Buat Baru</button>
+          </div>
+          <div id="taskError" class="error-message"></div>
+        </div>
+        <div class="page-header"><h2>Tugas Saya</h2></div>
+        <div id="myTasksList"></div>
+      </div>
+
+      <div id="review" class="page-content hidden">
+        <div class="page-header"><h1>Review Tugas</h1></div>
+        <div id="reviewList"></div>
+      </div>
     </div>
   </div>
 </div>
 
 <script>
-/* ================= ENV (SIMULASI) ================= */
-window.ENV={
-  SUPABASE_URL:"https://YOUR_PROJECT_ID.supabase.co",
-  SUPABASE_ANON_KEY:"YOUR_PUBLIC_ANON_KEY"
-};
+// PASTIKAN TABEL 'materi' MEMILIKI KOLOM 'title' DAN TABEL 'tasks' MEMILIKI KOLOM 'deadline', 'comment', 'score'.
+const SUPABASE_URL = "https://aoxvesqrnyqwedyydkno.supabase.co";
+const SUPABASE_ANON_KEY = "sb_publishable_bTLi7G5oHzZt9z49TA_G7A_JhDKH3Ff";
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-/* ================= SUPABASE ================= */
-const supabase = supabaseJs.createClient(
-  ENV.SUPABASE_URL,
-  ENV.SUPABASE_ANON_KEY
-);
+let currentUser = null;
+let userRole = null;
+let currentEditingMateriId = null;
+let currentEditingTaskId = null;
 
-/* ================= USER STATIC (DEMO) ================= */
-const users={
-  "Nicolas Tok":{pass:"ber217an",role:"admin"},
-  "clairine":{pass:"backburner",role:"user"},
-  "wixander":{pass:"backburner",role:"user"},
-  "angel":{pass:"backburner",role:"user"}
-};
+// Show login screen after welcome animation
+setTimeout(() => {
+  document.getElementById("loginScreen").style.display = "flex";
+}, 3200);
 
-let currentUser=null;
+// Check for existing session on page load
+document.addEventListener('DOMContentLoaded', async () => {
+  const emailInput = document.getElementById("email");
+  const passwordInput = document.getElementById("password");
+  const loginError = document.getElementById("loginError");
 
-/* ================= LOGIN ================= */
-function login(){
-const u=userInput.value;
-if(users[u].pass===passInput.value){
-currentUser=u;
-loginBox();
-}else alert("Password salah");
-}
+  [emailInput, passwordInput].forEach(input => {
+    input.addEventListener('input', () => {
+      loginError.style.display = 'none';
+      loginError.textContent = '';
+    });
+  });
 
-function loginBox(){
-login.style.display="none";
-app.classList.remove("hidden");
-ava.innerText=currentUser[0];
-uname.innerText=currentUser;
-buildMenu();
-loadHome();
-}
-
-/* ================= MENU ================= */
-function buildMenu(){
-menu.innerHTML=`
-<button onclick="show('home')">🏠 Beranda</button>
-${users[currentUser].role==="admin"?`
-<button onclick="show('editor')">💻 Upload Materi</button>
-<button onclick="show('tasks')">📥 Tugas Masuk</button>`:""}
-<button onclick="show('submit')">📝 Kumpul Tugas</button>
-<button onclick="location.reload()">🚪 Keluar</button>`;
-}
-
-function show(id){
-["home","editor","submit","tasks"].forEach(x=>{
-document.getElementById(x).classList.add("hidden");
+  try {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (session) await init();
+  } catch (error) {
+    console.error("Session check error:", error);
+  }
 });
-document.getElementById(id).classList.remove("hidden");
-if(id==="home")loadHome();
-if(id==="tasks")loadTasks();
+
+async function handleLogin() {
+  const email = document.getElementById("email").value;
+  const password = document.getElementById("password").value;
+  const loginBtn = document.getElementById("loginBtn");
+  const loginError = document.getElementById("loginError");
+
+  if (!email || !password) {
+    showError(loginError, "Email dan password harus diisi.");
+    return;
+  }
+
+  setButtonLoading(loginBtn, true);
+  hideError(loginError);
+
+  try {
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+    if (error) throw error;
+    await init();
+  } catch (error) {
+    showError(loginError, error.message || "Terjadi kesalahan saat login.");
+    setButtonLoading(loginBtn, false);
+  }
 }
 
-/* ================= MATERI ================= */
-async function uploadMateri(){
-if(users[currentUser].role!=="admin")return;
-const name=fileName.value;
-const code=codeArea.value;
+async function init() {
+  document.getElementById("loginScreen").style.display = "none";
+  document.getElementById("app").style.display = "block";
 
-await supabase
-.from("materi")
-.insert({name,content:code});
+  try {
+    const { data: { user }, error } = await supabase.auth.getUser();
+    if (error || !user) throw error || new Error("User not found");
 
-fileName.value="";codeArea.value="";
-loadHome();
+    currentUser = user;
+    document.getElementById("uname").innerText = user.email;
+    document.getElementById("ava").innerText = user.email[0].toUpperCase();
+
+    let { data: profile, error: profileError } = await supabase.from("profiles").select("*").eq("id", user.id).single();
+    if (profileError && profileError.code !== 'PGRST116') throw profileError;
+
+    if (!profile) {
+      const isAdmin = user.email.includes("nicolas") || user.email.includes("admin");
+      const { data: newProfile, error: insertError } = await supabase.from("profiles").insert({ id: user.id, email: user.email, role: isAdmin ? "admin" : "user" }).select().single();
+      if (insertError) throw insertError;
+      profile = newProfile;
+    }
+
+    userRole = profile.role;
+    if (userRole !== "admin") document.getElementById("reviewBtn").parentElement.style.display = "none";
+
+    await Promise.all([loadMateri(), loadMyTasks()]);
+    show('dash');
+  } catch (error) {
+    console.error("Initialization error:", error);
+    alert("Terjadi kesalahan saat memuat aplikasi: " + error.message);
+    logout();
+  }
 }
 
-async function loadHome(){
-home.innerHTML="<h2>Beranda</h2>";
-const {data}=await supabase.from("materi").select();
-data.forEach(d=>{
-home.innerHTML+=`
-<div class="card">
-<b>${d.name}</b>
-<pre>${d.content}</pre>
-</div>`;
-});
+function toggle() { sidebar.classList.toggle("collapsed"); }
+
+function show(id) {
+  document.querySelectorAll('.page-content').forEach(page => page.classList.add('hidden'));
+  document.getElementById(id).classList.remove('hidden');
+  if (id === 'review') loadTasks();
+  if (id === 'task') loadMyTasks();
 }
 
-/* ================= TUGAS ================= */
-async function submitTask(){
-await supabase.from("tasks").insert({
-user:currentUser,
-title:taskTitle.value,
-code:taskCode.value
-});
-alert("Tugas terkirim");
-taskTitle.value="";taskCode.value="";
+// --- MATERI FUNCTIONS ---
+async function saveMateri() {
+  const title = document.getElementById("materiTitle").value;
+  const content = document.getElementById("materiContent").value;
+  const saveBtn = document.getElementById("saveMateriBtn");
+  const uploadError = document.getElementById("uploadError");
+
+  if (!title.trim() || !content.trim()) { showError(uploadError, "Judul dan konten tidak boleh kosong."); return; }
+
+  setButtonLoading(saveBtn, true);
+  hideError(uploadError);
+
+  try {
+    const task = currentEditingMateriId
+      ? supabase.from("materi").update({ title, content }).eq("id", currentEditingMateriId)
+      : supabase.from("materi").insert({ title, content, created_by: currentUser.id });
+    
+    const { error } = await task;
+    if (error) throw error;
+
+    newFile(); await loadMateri(); show('dash');
+    alert(currentEditingMateriId ? "Materi berhasil diperbarui!" : "Materi baru berhasil disimpan!");
+  } catch (error) {
+    showError(uploadError, "Gagal menyimpan materi: " + error.message);
+  } finally {
+    setButtonLoading(saveBtn, false, currentEditingMateriId ? "Perbarui Materi" : "Simpan Materi Baru");
+  }
 }
 
-async function loadTasks(){
-taskList.innerHTML="";
-const {data}=await supabase.from("tasks").select();
-data.forEach(t=>{
-taskList.innerHTML+=`
-<div class="card">
-<b>${t.user} - ${t.title}</b>
-<pre>${t.code}</pre>
-</div>`;
-});
+async function loadMateri() {
+  try {
+    const { data, error } = await supabase.from("materi").select("*").order("created_at", { ascending: false });
+    if (error) throw error;
+    const dashContent = document.getElementById("dashContent"); dashContent.innerHTML = "";
+    if (data && data.length > 0) {
+      data.forEach(m => {
+        const card = createCard(m);
+        dashContent.appendChild(card);
+      });
+    } else {
+      dashContent.innerHTML = '<p class="text-center">Belum ada materi. Buat materi baru di Code Editor!</p>';
+    }
+  } catch (error) {
+    console.error("Error loading materi:", error); document.getElementById("dashContent").innerHTML = '<p class="text-center">Gagal memuat materi</p>';
+  }
 }
+
+function createCard(m) {
+  const card = document.createElement("div"); card.className = "card";
+  const date = new Date(m.created_at).toLocaleDateString('id-ID', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+  card.innerHTML = `
+    <h3>${m.title || 'Tanpa Judul'}</h3>
+    <div class="card-meta">${date}</div>
+    <pre>${m.content}</pre>
+    <div class="card-actions">
+      <button class="btn btn-secondary" onclick="editMateri(${m.id})">Edit</button>
+      <button class="btn btn-danger" onclick="deleteMateri(${m.id})">Hapus</button>
+    </div>`;
+  return card;
+}
+
+function newFile() {
+  currentEditingMateriId = null;
+  document.getElementById("materiTitle").value = "";
+  document.getElementById("materiContent").value = "";
+  const btn = document.getElementById("saveMateriBtn");
+  btn.innerText = "Simpan Materi Baru";
+  btn.disabled = false;
+  hideError(document.getElementById("uploadError"));
+}
+
+async function editMateri(id) {
+  try {
+    const { data, error } = await supabase.from("materi").select("title, content").eq("id", id).single();
+    if (error) throw error;
+    currentEditingMateriId = id;
+    document.getElementById("materiTitle").value = data.title;
+    document.getElementById("materiContent").value = data.content;
+    const btn = document.getElementById("saveMateriBtn");
+    btn.innerText = "Perbarui Materi";
+    btn.disabled = false;
+    hideError(document.getElementById("uploadError"));
+    show('editor');
+  } catch (error) {
+    console.error("Error fetching materi for edit:", error); alert("Gagal memuat materi untuk diedit.");
+  }
+}
+
+async function deleteMateri(id) {
+  if (!confirm("Apakah Anda yakin ingin menghapus materi ini?")) return;
+  try {
+    const { error } = await supabase.from("materi").delete().eq("id", id);
+    if (error) throw error;
+    alert("Materi berhasil dihapus."); await loadMateri();
+  } catch (error) {
+    console.error("Error deleting materi:", error); alert("Gagal menghapus materi: " + error.message);
+  }
+}
+
+// --- TASK FUNCTIONS ---
+async function submitTask() {
+  const title = document.getElementById("taskTitle").value;
+  const code = document.getElementById("taskCode").value;
+  const deadline = document.getElementById("taskDeadline").value;
+  const taskError = document.getElementById("taskError");
+  const submitBtn = document.getElementById("submitTaskBtn");
+
+  if (!title.trim() || !code.trim()) { showError(taskError, "Judul dan kode tugas harus diisi."); return; }
+
+  setButtonLoading(submitBtn, true);
+  hideError(taskError);
+
+  try {
+    const taskData = { user_id: currentUser.id, username: currentUser.email, title, code, deadline };
+    const task = currentEditingTaskId
+      ? supabase.from("tasks").update(taskData).eq("id", currentEditingTaskId)
+      : supabase.from("tasks").insert(taskData);
+
+    const { error } = await task;
+    if (error) throw error;
+
+    resetTaskForm(); await loadMyTasks();
+    alert(currentEditingTaskId ? "Tugas berhasil diperbarui!" : "Tugas berhasil dikirim!");
+  } catch (error) {
+    showError(taskError, "Gagal mengirim tugas: " + error.message);
+  } finally {
+    setButtonLoading(submitBtn, false, currentEditingTaskId ? "Perbarui Tugas" : "Kirim Tugas");
+  }
+}
+
+function resetTaskForm() {
+  currentEditingTaskId = null;
+  document.getElementById("taskTitle").value = "";
+  document.getElementById("taskCode").value = "";
+  document.getElementById("taskDeadline").value = "";
+  const btn = document.getElementById("submitTaskBtn");
+  btn.innerText = "Kirim Tugas";
+  btn.disabled = false;
+  hideError(document.getElementById("taskError"));
+}
+
+async function loadMyTasks() {
+  if (!currentUser) return;
+  try {
+    const { data, error } = await supabase.from("tasks").select("*").eq("user_id", currentUser.id).order("created_at", { ascending: false });
+    if (error) throw error;
+    const myTasksList = document.getElementById("myTasksList"); myTasksList.innerHTML = "";
+    if (data && data.length > 0) {
+      data.forEach(t => {
+        const card = document.createElement("div"); card.className = "card";
+        const deadlineText = t.deadline ? new Date(t.deadline).toLocaleString('id-ID') : 'Tidak ada deadline';
+        card.innerHTML = `
+          <h3>${t.title}</h3>
+          <div class="card-meta">Deadline: ${deadlineText}</div>
+          <button class="btn btn-secondary" onclick="editTask(${t.id})" style="width: auto;">Edit Tugas Ini</button>
+        `;
+        myTasksList.appendChild(card);
+      });
+    } else {
+      myTasksList.innerHTML = '<p class="text-center">Anda belum mengumpulkan tugas apa pun.</p>';
+    }
+  } catch (error) {
+    console.error("Error loading my tasks:", error); document.getElementById("myTasksList").innerHTML = '<p class="text-center">Gagal memuat tugas Anda.</p>';
+  }
+}
+
+async function editTask(id) {
+  try {
+    const { data, error } = await supabase.from("tasks").select("title, code, deadline").eq("id", id).single();
+    if (error) throw error;
+    currentEditingTaskId = id;
+    document.getElementById("taskTitle").value = data.title;
+    document.getElementById("taskCode").value = data.code;
+    if(data.deadline) {
+        const date = new Date(data.deadline);
+        date.setMinutes(date.getMinutes() - date.getTimezoneOffset());
+        document.getElementById("taskDeadline").value = date.toISOString().slice(0, 16);
+    }
+    const btn = document.getElementById("submitTaskBtn");
+    btn.innerText = "Perbarui Tugas";
+    btn.disabled = false;
+    hideError(document.getElementById("taskError"));
+    show('task');
+    document.getElementById('task').scrollIntoView({ behavior: 'smooth' });
+  } catch (error) {
+    console.error("Error fetching task for edit:", error); alert("Gagal memuat tugas untuk diedit.");
+  }
+}
+
+async function loadTasks() {
+  try {
+    const { data, error } = await supabase.from("tasks").select("*").order("created_at", { ascending: false });
+    if (error) throw error;
+    const reviewList = document.getElementById("reviewList"); reviewList.innerHTML = "";
+    if (data && data.length > 0) {
+      data.forEach(t => {
+        const card = document.createElement("div"); card.className = "card";
+        const date = new Date(t.created_at).toLocaleDateString('id-ID', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+        const deadlineText = t.deadline ? `Deadline: ${new Date(t.deadline).toLocaleString('id-ID')}` : '';
+        card.innerHTML = `
+          <h3>${t.title}</h3>
+          <div class="card-meta"><b>${t.username}</b> - ${date} ${deadlineText}</div>
+          <pre>${t.code}</pre>
+          ${userRole === "admin" ? `
+            <div class="form-group">
+              <label for="comment-${t.id}">Komentar</label>
+              <input id="comment-${t.id}" value="${t.comment || ''}">
+            </div>
+            <div class="form-group">
+              <label for="score-${t.id}">Nilai</label>
+              <input id="score-${t.id}" type="number" value="${t.score || ''}" min="0" max="100">
+            </div>
+            <button class="btn btn-primary" onclick="saveReview(${t.id})" style="width: auto;">Simpan Review</button>
+          ` : `
+            ${t.comment ? `<p><b>Komentar:</b> ${t.comment}</p>` : ""}
+            ${t.score ? `<p><b>Nilai:</b> ${t.score}</p>` : ""}
+          `}
+        `;
+        reviewList.appendChild(card);
+      });
+    } else {
+      reviewList.innerHTML = '<p class="text-center">Belum ada tugas yang dikumpulkan</p>';
+    }
+  } catch (error) {
+    console.error("Error loading tasks:", error); document.getElementById("reviewList").innerHTML = '<p class="text-center">Gagal memuat tugas</p>';
+  }
+}
+
+async function saveReview(taskId) {
+    const comment = document.getElementById(`comment-${taskId}`).value;
+    const score = document.getElementById(`score-${taskId}`).value;
+    try {
+        const { error } = await supabase.from("tasks").update({ comment, score }).eq("id", taskId);
+        if (error) throw error;
+        alert("Review berhasil disimpan!");
+    } catch (error) {
+        console.error("Error saving review:", error);
+        alert("Gagal menyimpan review: " + error.message);
+    }
+}
+
+async function logout() {
+  try {
+    const { error } = await supabase.auth.signOut();
+    if (error) throw error;
+    currentUser = null; userRole = null; location.reload();
+  } catch (error) {
+    console.error("Logout error:", error); alert("Terjadi kesalahan saat logout: " + error.message);
+  }
+}
+
+// --- UTILITY FUNCTIONS ---
+function setButtonLoading(button, isLoading, originalText = '') {
+    if(isLoading) {
+        button.dataset.originalText = button.innerText;
+        button.innerHTML = '<span class="loading"></span> Memproses...';
+        button.disabled = true;
+    } else {
+        button.innerHTML = originalText || button.dataset.originalText || 'Kirim';
+        button.disabled = false;
+    }
+}
+
+function showError(element, message) {
+    element.textContent = message;
+    element.style.display = 'block';
+}
+
+function hideError(element) {
+    element.style.display = 'none';
+    element.textContent = '';
+}
+
 </script>
-
 </body>
 </html>
