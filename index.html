@@ -9,9 +9,6 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
-    <!-- Supabase JS -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    
     <!-- Favicon untuk menghindari error 404 -->
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📚</text></svg>">
     
@@ -1274,6 +1271,9 @@
         </div>
     </div>
 
+    <!-- Supabase JS -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
     <script>
         // ===================================================
         //                    SUPABASE CONFIG
@@ -1281,18 +1281,20 @@
         const supabaseUrl = 'https://aoxvesqrnyqwedyydkno.supabase.co';
         const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFveHZlc3Fybnlxd2VkeXlka25vIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU4OTg3MjksImV4cCI6MjA4MTQ3NDcyOX0._aQv1APVP9pW02arXN21M5AE_Z7uS9BINpyX4IiQsYY';
 
-        // Gunakan IIFE untuk menghindari konflik
-        const db = (() => {
+        // Inisialisasi Supabase dengan pengecekan
+        let supabaseClient = null;
+        
+        // Cek apakah Supabase sudah dimuat
+        if (typeof window.supabase !== 'undefined') {
             try {
-                return window.supabase.createClient(supabaseUrl, supabaseKey);
+                supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
+                console.log('Supabase client initialized successfully');
             } catch (error) {
-                console.error('Error creating Supabase client:', error);
-                return null;
+                console.error('Error initializing Supabase client:', error);
             }
-        })();
-
-        // Gunakan db di seluruh kode
-        const supabase = db;
+        } else {
+            console.error('Supabase library not loaded');
+        }
         
         // ===================================================
         //                    GLOBAL VARIABLES
@@ -1312,8 +1314,8 @@
             }, 3000);
             
             // Setup listener untuk perubahan status autentikasi
-            if (supabase) {
-                supabase.auth.onAuthStateChange((event, session) => {
+            if (supabaseClient) {
+                supabaseClient.auth.onAuthStateChange((event, session) => {
                     if (event === 'SIGNED_IN' && session) {
                         checkAuthStatus();
                     } else if (event === 'SIGNED_OUT') {
@@ -1330,7 +1332,7 @@
         //                    AUTHENTICATION
         // ===================================================
         async function checkAuthStatus() {
-            if (!supabase) {
+            if (!supabaseClient) {
                 console.error('Supabase client not initialized');
                 document.getElementById('loginScreen').style.display = 'flex';
                 return;
@@ -1338,7 +1340,7 @@
 
             try {
                 console.log('Checking auth status...');
-                const { data: { session }, error } = await supabase.auth.getSession();
+                const { data: { session }, error } = await supabaseClient.auth.getSession();
                 
                 if (error) {
                     console.error('Session error:', error);
@@ -1349,7 +1351,7 @@
                     console.log('Session found, user ID:', session.user.id);
                     
                     // Cek apakah profil pengguna ada
-                    const { data: profile, error: profileError } = await supabase
+                    const { data: profile, error: profileError } = await supabaseClient
                         .from('profiles')
                         .select('*')
                         .eq('id', session.user.id)
@@ -1358,7 +1360,7 @@
                     if (profileError && profileError.code === 'PGRST116') {
                         // Jika profil tidak ada, buat profil baru
                         console.log('Profile not found, creating new one...');
-                        const { data: newProfile, error: createError } = await supabase
+                        const { data: newProfile, error: createError } = await supabaseClient
                             .from('profiles')
                             .insert([
                                 { 
@@ -1399,7 +1401,7 @@
         }
         
         async function handleLogin() {
-            if (!supabase) {
+            if (!supabaseClient) {
                 showNotification('Supabase client not initialized', 'error');
                 return;
             }
@@ -1421,7 +1423,7 @@
                 console.log('Attempting login with email:', email);
                 
                 // Login dengan Supabase Auth
-                const { data, error } = await supabase.auth.signInWithPassword({
+                const { data, error } = await supabaseClient.auth.signInWithPassword({
                     email: email,
                     password: password
                 });
@@ -1434,7 +1436,7 @@
                 console.log('Login successful, user ID:', data.user.id);
                 
                 // Periksa apakah profil pengguna ada
-                const { data: profile, error: profileError } = await supabase
+                const { data: profile, error: profileError } = await supabaseClient
                     .from('profiles')
                     .select('*')
                     .eq('id', data.user.id)
@@ -1443,7 +1445,7 @@
                 if (profileError && profileError.code === 'PGRST116') {
                     // Jika profil tidak ada, buat profil baru
                     console.log('Profile not found, creating new one...');
-                    const { data: newProfile, error: createError } = await supabase
+                    const { data: newProfile, error: createError } = await supabaseClient
                         .from('profiles')
                         .insert([
                             { 
@@ -1498,13 +1500,13 @@
         }
         
         async function logout() {
-            if (!supabase) {
+            if (!supabaseClient) {
                 showNotification('Supabase client not initialized', 'error');
                 return;
             }
 
             try {
-                const { error } = await supabase.auth.signOut();
+                const { error } = await supabaseClient.auth.signOut();
                 
                 if (error) {
                     throw error;
@@ -1652,26 +1654,26 @@
         //                    DASHBOARD
         // ===================================================
         async function loadDashboard() {
-            if (!supabase) {
+            if (!supabaseClient) {
                 showNotification('Supabase client not initialized', 'error');
                 return;
             }
 
             try {
                 // Load statistik
-                const { count: materiCount, error: materiError } = await supabase
+                const { count: materiCount, error: materiError } = await supabaseClient
                     .from('materi')
                     .select('*', { count: 'exact', head: true });
                     
-                const { count: assignmentsCount, error: assignmentsError } = await supabase
+                const { count: assignmentsCount, error: assignmentsError } = await supabaseClient
                     .from('assignments')
                     .select('*', { count: 'exact', head: true });
                     
-                const { count: submissionsCount, error: submissionsError } = await supabase
+                const { count: submissionsCount, error: submissionsError } = await supabaseClient
                     .from('submissions')
                     .select('*', { count: 'exact', head: true });
                     
-                const { count: reviewsCount, error: reviewsError } = await supabase
+                const { count: reviewsCount, error: reviewsError } = await supabaseClient
                     .from('reviews')
                     .select('*', { count: 'exact', head: true });
                     
@@ -1684,7 +1686,7 @@
                 });
                 
                 // Load materi terbaru
-                const { data: recentMateri, error: recentMateriError } = await supabase
+                const { data: recentMateri, error: recentMateriError } = await supabaseClient
                     .from('materi')
                     .select(`
                         *,
@@ -1700,7 +1702,7 @@
                 displayRecentMateri(recentMateri);
                 
                 // Load tugas aktif
-                const { data: activeTasks, error: activeTasksError } = await supabase
+                const { data: activeTasks, error: activeTasksError } = await supabaseClient
                     .from('assignments')
                     .select(`
                         *,
@@ -1719,7 +1721,7 @@
                 
                 // Load progress pengguna
                 if (currentUser.role === 'student') {
-                    const { data: userSubmissions, error: userSubmissionsError } = await supabase
+                    const { data: userSubmissions, error: userSubmissionsError } = await supabaseClient
                         .from('submissions')
                         .select(`
                             *,
@@ -1734,7 +1736,7 @@
                     displayUserProgress(userSubmissions);
                 } else {
                     // Load submissions untuk teacher
-                    const { data: allSubmissions, error: allSubmissionsError } = await supabase
+                    const { data: allSubmissions, error: allSubmissionsError } = await supabaseClient
                         .from('submissions')
                         .select(`
                             *,
@@ -1950,13 +1952,13 @@
         //                    MATERI MANAGEMENT
         // ===================================================
         async function loadMateriList() {
-            if (!supabase) {
+            if (!supabaseClient) {
                 showNotification('Supabase client not initialized', 'error');
                 return;
             }
 
             try {
-                const { data, error } = await supabase
+                const { data, error } = await supabaseClient
                     .from('materi')
                     .select(`
                         *,
@@ -2026,7 +2028,7 @@
         }
         
         async function saveMateri() {
-            if (!supabase) {
+            if (!supabaseClient) {
                 showNotification('Supabase client not initialized', 'error');
                 return;
             }
@@ -2057,7 +2059,7 @@
             try {
                 if (currentEditingMateri) {
                     // Update existing materi
-                    const { error } = await supabase
+                    const { error } = await supabaseClient
                         .from('materi')
                         .update({
                             title: title,
@@ -2073,7 +2075,7 @@
                     showNotification('Materi berhasil diperbarui!', 'success');
                 } else {
                     // Create new materi
-                    const { error } = await supabase
+                    const { error } = await supabaseClient
                         .from('materi')
                         .insert({
                             title: title,
@@ -2104,13 +2106,13 @@
         }
         
         async function editMateri(materiId) {
-            if (!supabase) {
+            if (!supabaseClient) {
                 showNotification('Supabase client not initialized', 'error');
                 return;
             }
 
             try {
-                const { data, error } = await supabase
+                const { data, error } = await supabaseClient
                     .from('materi')
                     .select('*')
                     .eq('id', materiId)
@@ -2139,13 +2141,13 @@
                 return;
             }
             
-            if (!supabase) {
+            if (!supabaseClient) {
                 showNotification('Supabase client not initialized', 'error');
                 return;
             }
 
             try {
-                const { error } = await supabase
+                const { error } = await supabaseClient
                     .from('materi')
                     .delete()
                     .eq('id', materiId);
@@ -2172,13 +2174,13 @@
         //                    ASSIGNMENT MANAGEMENT
         // ===================================================
         async function loadAssignmentsList() {
-            if (!supabase) {
+            if (!supabaseClient) {
                 showNotification('Supabase client not initialized', 'error');
                 return;
             }
 
             try {
-                const { data, error } = await supabase
+                const { data, error } = await supabaseClient
                     .from('assignments')
                     .select(`
                         *,
@@ -2243,7 +2245,7 @@
         }
         
         async function showCreateAssignmentForm() {
-            if (!supabase) {
+            if (!supabaseClient) {
                 showNotification('Supabase client not initialized', 'error');
                 return;
             }
@@ -2257,7 +2259,7 @@
             
             // Load materi options
             try {
-                const { data: materiList, error } = await supabase
+                const { data: materiList, error } = await supabaseClient
                     .from('materi')
                     .select('id, title')
                     .order('title');
@@ -2284,7 +2286,7 @@
         }
         
         async function saveAssignment() {
-            if (!supabase) {
+            if (!supabaseClient) {
                 showNotification('Supabase client not initialized', 'error');
                 return;
             }
@@ -2329,7 +2331,7 @@
             try {
                 if (currentEditingAssignment) {
                     // Update existing assignment
-                    const { error } = await supabase
+                    const { error } = await supabaseClient
                         .from('assignments')
                         .update({
                             title: title,
@@ -2347,7 +2349,7 @@
                     showNotification('Tugas berhasil diperbarui!', 'success');
                 } else {
                     // Create new assignment
-                    const { error } = await supabase
+                    const { error } = await supabaseClient
                         .from('assignments')
                         .insert({
                             title: title,
@@ -2380,13 +2382,13 @@
         }
         
         async function editAssignment(assignmentId) {
-            if (!supabase) {
+            if (!supabaseClient) {
                 showNotification('Supabase client not initialized', 'error');
                 return;
             }
 
             try {
-                const { data, error } = await supabase
+                const { data, error } = await supabaseClient
                     .from('assignments')
                     .select('*')
                     .eq('id', assignmentId)
@@ -2417,13 +2419,13 @@
                 return;
             }
             
-            if (!supabase) {
+            if (!supabaseClient) {
                 showNotification('Supabase client not initialized', 'error');
                 return;
             }
 
             try {
-                const { error } = await supabase
+                const { error } = await supabaseClient
                     .from('assignments')
                     .delete()
                     .eq('id', assignmentId);
@@ -2482,7 +2484,7 @@
         }
         
         async function submitAssignmentHandler(assignmentId) {
-            if (!supabase) {
+            if (!supabaseClient) {
                 showNotification('Supabase client not initialized', 'error');
                 return;
             }
@@ -2495,7 +2497,7 @@
             }
             
             try {
-                const { error } = await supabase
+                const { error } = await supabaseClient
                     .from('submissions')
                     .insert({
                         assignment_id: assignmentId,
@@ -2541,13 +2543,13 @@
         }
         
         async function loadReviews() {
-            if (!supabase) {
+            if (!supabaseClient) {
                 showNotification('Supabase client not initialized', 'error');
                 return;
             }
 
             try {
-                const { data, error } = await supabase
+                const { data, error } = await supabaseClient
                     .from('reviews')
                     .select(`
                         *,
